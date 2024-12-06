@@ -1,5 +1,5 @@
 // src/components/ProblemList.tsx
-import { Button } from 'your-button-component'; // Replace with your actual button component
+import { CheckCircle } from 'lucide-react'; // Added missing import
 import { Problem } from '../types';
 
 interface Props {

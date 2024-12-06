@@ -15,6 +15,8 @@ export interface Participant {
   score: number;
 }
 
+// src/types/index.ts
+
 export interface Problem {
   id: string;
   title: string;
@@ -26,7 +28,6 @@ export interface Problem {
     private: TestCase[];
   };
 }
-
 export interface TestCase {
   id: string;
   input: string;
