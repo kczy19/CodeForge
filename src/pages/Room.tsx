@@ -210,22 +210,7 @@ export default function Room() {
                   code={code}
                 />
                 {/* Action Buttons */}
-                <div className="flex justify-end gap-4 mt-4">
-                  <button
-                    onClick={() => handleRunCode(code)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2"
-                  >
-                    <ChevronUp size={16} />
-                    Run
-                  </button>
-                  <button
-                    onClick={() => handleSubmitCode(code)}
-                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2"
-                  >
-                    <ChevronDown size={16} />
-                    Submit
-                  </button>
-                </div>
+                
               </div>
 
               {/* Test Results */}

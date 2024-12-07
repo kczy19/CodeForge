@@ -1,7 +1,5 @@
-// src/components/CodeEditor.tsx
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Editor from '@monaco-editor/react';
-import { ResizableBox } from 'react-resizable';
 import 'react-resizable/css/styles.css';
 
 interface Props {
@@ -17,58 +15,66 @@ export default function CodeEditor({
   problemId,
   onRun,
   onSubmit,
-  initialTemplate,
+  initialTemplate = '',
   setCode,
   code,
 }: Props) {
-  const [codeMap, setCodeMap] = useState<{ [key: string]: string }>({});
-  const [localCode, setLocalCode] = useState<string>(initialTemplate || '');
-
-  useEffect(() => {
-    if (codeMap[problemId]) {
-      setLocalCode(codeMap[problemId]);
-      setCode(codeMap[problemId]);
-    } else {
-      setLocalCode(initialTemplate || '');
-      setCode(initialTemplate || '');
-    }
-  }, [problemId, codeMap, initialTemplate, setCode]);
+  const [codeMap, setCodeMap] = useState<{ [key: string]: string }>({
+    [problemId]: initialTemplate,
+  });
 
   const handleCodeChange = (value: string | undefined) => {
     const updatedCode = value || '';
-    setLocalCode(updatedCode);
+    setCodeMap((prev) => ({
+      ...prev,
+      [problemId]: updatedCode,
+    }));
     setCode(updatedCode);
-    setCodeMap((prev) => ({ ...prev, [problemId]: updatedCode }));
+  };
+
+  const handleRun = () => {
+    const currentCode = codeMap[problemId] || initialTemplate;
+    onRun(currentCode); // Ensure the latest code is passed to onRun
+  };
+
+  const handleSubmit = () => {
+    const currentCode = codeMap[problemId] || initialTemplate;
+    onSubmit(currentCode); // Ensure the latest code is passed to onSubmit
   };
 
   return (
-    <ResizableBox
-      width={Infinity}
-      height={400}
-      minConstraints={[Infinity, 200]}
-      maxConstraints={[Infinity, 600]}
-      resizeHandles={['s']}
-      className="resizable-box"
-    >
-      <div className="h-full flex flex-col bg-gray-900 rounded-lg shadow-lg">
-        <div className="flex-1">
-          <Editor
-            height="100%"
-            defaultLanguage="javascript"
-            theme="vs-dark"
-            value={localCode}
-            onChange={handleCodeChange}
-            options={{
-              minimap: { enabled: false },
-              fontSize: 14,
-              lineNumbers: 'on',
-              automaticLayout: true,
-              scrollBeyondLastLine: false,
-              tabSize: 2,
-            }}
-          />
-        </div>
+    <div className="h-full flex flex-col bg-gray-900 rounded-lg shadow-lg" style={{ height: '600px' }}>
+      <div className="flex-1">
+        <Editor
+          height="100%"
+          defaultLanguage="javascript"
+          theme="vs-dark"
+          value={codeMap[problemId] || initialTemplate}
+          onChange={handleCodeChange}
+          options={{
+            minimap: { enabled: false },
+            fontSize: 14,
+            lineNumbers: 'on',
+            automaticLayout: true,
+            scrollBeyondLastLine: false,
+            tabSize: 2,
+          }}
+        />
       </div>
-    </ResizableBox>
+      <div className="flex justify-end p-2 space-x-2">
+        <button
+          onClick={handleRun}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Run
+        </button>
+        <button
+          onClick={handleSubmit}
+          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+        >
+          Submit
+        </button>
+      </div>
+    </div>
   );
 }
