@@ -42,7 +42,7 @@ export default function Room() {
   }, [room?.startTime]);
 
   const copyInviteLink = () => {
-    navigator.clipboard.writeText(window.location.href);
+    navigator.clipboard.writeText(room?.id || '');
   };
 
   const handleRunCode = async (currentCode: string) => {
