@@ -48,6 +48,7 @@ export default function Room() {
   const handleRunCode = async (currentCode: string) => {
     if (!selectedProblem) return;
     setIsRunning(true);
+    setTestResults([]); // Clear previous test results
     const results = await Promise.all(
       selectedProblem.testCases.public.map(async (testCase) => ({
         ...testCase,
@@ -66,14 +67,13 @@ export default function Room() {
       ...selectedProblem.testCases.private,
     ];
 
+    setTestResults([]); // Clear previous test results
     const results = await Promise.all(
       allTestCases.map(async (testCase) => ({
         ...testCase,
         result: await runCode(currentCode, testCase),
       }))
     );
-
-    setTestResults(results);
 
     if (results.every((testCase) => testCase.result.passed)) {
       socket.emit('submit-solution', {

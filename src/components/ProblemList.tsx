@@ -1,6 +1,6 @@
 // src/components/ProblemList.tsx
-import { CheckCircle } from 'lucide-react'; // Added missing import
-import { Problem } from '../types';
+import { CheckCircle } from 'lucide-react';
+import { Problem } from '../types'; // Added missing import
 
 interface Props {
   problems: Problem[];

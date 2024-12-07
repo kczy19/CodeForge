@@ -21,17 +21,24 @@ export default function CodeEditor({
   setCode,
   code,
 }: Props) {
+  const [codeMap, setCodeMap] = useState<{ [key: string]: string }>({});
   const [localCode, setLocalCode] = useState<string>(initialTemplate || '');
 
   useEffect(() => {
-    setLocalCode(initialTemplate || '');
-    setCode(initialTemplate || '');
-  }, [problemId, initialTemplate, setCode]);
+    if (codeMap[problemId]) {
+      setLocalCode(codeMap[problemId]);
+      setCode(codeMap[problemId]);
+    } else {
+      setLocalCode(initialTemplate || '');
+      setCode(initialTemplate || '');
+    }
+  }, [problemId, codeMap, initialTemplate, setCode]);
 
   const handleCodeChange = (value: string | undefined) => {
     const updatedCode = value || '';
     setLocalCode(updatedCode);
     setCode(updatedCode);
+    setCodeMap((prev) => ({ ...prev, [problemId]: updatedCode }));
   };
 
   return (
