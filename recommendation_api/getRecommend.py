@@ -44,11 +44,6 @@ class PopularityCalculator:
         self.engagement = engagement
         self.submission = submission
 
-    def calculate_engagement_score(self):
-        total_engagement = self.acceptance.fillna(0) + self.engagement.fillna(0) + SMOOTHING_FACTOR
-        max_engagement = total_engagement.max()
-        return total_engagement / max_engagement
-
     def normalize_series(self, series):
         return (series - series.min()) / (series.max() - series.min())
 
@@ -98,13 +93,6 @@ async def recommender_system(problem_id: int = 1, limit: int = Query(10, ge=1, l
     try:
         # Log the request parameters
         print(f"Received request for problem_id={problem_id}, limit={limit}")
-        
-        # Validate problem_id
-        if not isinstance(problem_id, int):
-            try:
-                problem_id = int(problem_id)
-            except (ValueError, TypeError):
-                raise HTTPException(status_code=400, detail="Problem ID must be an integer")
         
         # Load dataset
         try:
