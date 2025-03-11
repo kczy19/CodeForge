@@ -64,7 +64,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-        <h1 className="text-2xl font-bold mb-6 text-center">Code Battle</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">CodeForge</h1>
         
         {!showJoinForm && !showRecommendationForm ? (
           <div className="space-y-4">
