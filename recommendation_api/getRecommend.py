@@ -1,11 +1,11 @@
-from fastapi import FastAPI, HTTPException, Query
-import pandas as pd
+from fastapi import FastAPI, HTTPException, Query # type: ignore
+import pandas as pd # type: ignore
 from pathlib import Path
 from typing import List
-from pydantic import BaseModel
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel # type: ignore
+from sklearn.feature_extraction.text import TfidfVectorizer # type: ignore
+from sklearn.metrics.pairwise import cosine_similarity # type: ignore
+from fastapi.middleware.cors import CORSMiddleware # type: ignore
 import traceback
 
 # Constants
@@ -158,5 +158,5 @@ async def root():
     return {"status": "API is running"}
 
 if __name__ == "__main__":
-    import uvicorn
+    import uvicorn # type: ignore
     uvicorn.run(app, host="127.0.0.1", port=3451)
