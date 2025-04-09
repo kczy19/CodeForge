@@ -29,7 +29,20 @@ export default function ProblemList({
           >
             <div>
               <span className="font-medium">{problem.title}</span>
-              <div className="text-sm text-gray-500">Difficulty: {problem.difficulty}</div>
+              <div className="text-sm text-gray-500">
+                Difficulty:{' '}
+                <span
+                  className={`px-2 py-1 rounded-full text-sm ${
+                    problem.difficulty === 'easy'
+                      ? 'bg-green-100 text-green-800'
+                      : problem.difficulty === 'medium'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}
+                >
+                  {problem.difficulty}
+                </span>
+              </div>
             </div>
             {solvedProblems.includes(problem.id) && (
               <CheckCircle className="text-green-500" size={20} />

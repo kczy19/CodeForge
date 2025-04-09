@@ -26,17 +26,15 @@ const TestResults: React.FC<Props> = ({ testCases, isLoading }) => {
         <div className="animate-pulse space-y-2">
           <div className="h-6 bg-gray-200 rounded w-1/4"></div>
           <div className="h-20 bg-gray-200 rounded"></div>
-          <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-          <div className="h-20 bg-gray-200 rounded"></div>
         </div>
       </div>
     );
   }
 
-  if (testCases.length === 0) {
+  if (!testCases || testCases.length === 0) {
     return (
       <div className="p-4 text-center text-gray-500">
-        No test cases available.
+        Run your code to see test results
       </div>
     );
   }
@@ -45,7 +43,7 @@ const TestResults: React.FC<Props> = ({ testCases, isLoading }) => {
     <div className="p-4">
       {testCases.map((testCase, index) => (
         <div
-          key={testCase.id}
+          key={testCase.id || index}
           className="border rounded-md p-4 mb-4 bg-white shadow"
         >
           <div className="flex items-center justify-between mb-2">

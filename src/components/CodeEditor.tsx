@@ -43,34 +43,31 @@ export default function CodeEditor({
   };
 
   return (
-    <div className="h-full flex flex-col bg-gray-900 rounded-lg shadow-lg" style={{ height: '600px' }}>
-      <div className="flex-1">
-        <Editor
-          height="100%"
-          defaultLanguage="javascript"
-          theme="vs-dark"
-          value={codeMap[problemId] || initialTemplate}
-          onChange={handleCodeChange}
-          options={{
-            minimap: { enabled: false },
-            fontSize: 14,
-            lineNumbers: 'on',
-            automaticLayout: true,
-            scrollBeyondLastLine: false,
-            tabSize: 2,
-          }}
-        />
-      </div>
-      <div className="flex justify-end p-2 space-x-2">
+    <div className="relative h-full flex flex-col">
+      <Editor
+        height="calc(100% - 50px)"
+        defaultLanguage="javascript"
+        value={code}
+        onChange={(value) => {
+          setCode(value || '');
+        }}
+        theme="vs-dark"
+        options={{
+          minimap: { enabled: false },
+          fontSize: 14,
+          scrollBeyondLastLine: false,
+        }}
+      />
+      <div className="h-[50px] flex items-center justify-end gap-4 px-4 bg-[#1e1e1e] border-t border-gray-700">
         <button
-          onClick={handleRun}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          onClick={() => onRun(code)}
+          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
         >
           Run
         </button>
         <button
-          onClick={handleSubmit}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+          onClick={() => onSubmit(code)}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
         >
           Submit
         </button>

@@ -5,7 +5,7 @@ import { Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { problems as sampleProblems } from './problems.js';
+import { problems } from './problems/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,6 +18,10 @@ const io = new Server(httpServer, {
     methods: ['GET', 'POST'],
   },
 });
+
+// Serve static files for starter code and public assets
+app.use('/starters', express.static(path.join(__dirname, 'starters')));
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Serve static files from the dist directory in production
 if (process.env.NODE_ENV === 'production') {
@@ -36,7 +40,17 @@ io.on('connection', (socket) => {
 
   socket.on('create-room', (userName, callback) => {
     const roomId = uuidv4();
-    const userId = socket.id; // Use socket.id as userId
+    const userId = socket.id;
+
+    // Check if room already exists
+    if (rooms.has(roomId)) {
+      callback({ error: 'Room already exists' });
+      return;
+    }
+
+    // Get fresh random problems for each new room
+    const shuffledProblems = [...problems].sort(() => Math.random() - 0.5);
+    const selectedProblems = shuffledProblems.slice(0, 3);
 
     const room = {
       id: roomId,
@@ -49,7 +63,7 @@ io.on('connection', (socket) => {
           score: 0,
         },
       ],
-      problems: sampleProblems,
+      problems: selectedProblems,
       status: 'waiting',
     };
 
@@ -116,7 +130,22 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log(`Client disconnected: ${socket.id}`);
-    // Optional: Handle participant removal if needed
+    // Remove participant from any room they're in
+    for (const [roomId, room] of rooms.entries()) {
+      const participantIndex = room.participants.findIndex(p => p.id === socket.id);
+      if (participantIndex !== -1) {
+        room.participants.splice(participantIndex, 1);
+        
+        // If room is empty, remove it
+        if (room.participants.length === 0) {
+          rooms.delete(roomId);
+        } else {
+          // Notify remaining participants
+          io.to(roomId).emit('room-state', room);
+        }
+        break;
+      }
+    }
   });
 });
 

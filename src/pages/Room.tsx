@@ -26,8 +26,19 @@ export default function Room() {
   const [isRunning, setIsRunning] = useState(false);
   const [showTestResults, setShowTestResults] = useState<boolean>(true);
   const [code, setCode] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const selectedProblem = room?.problems[selectedProblemIndex];
+
+  useEffect(() => {
+    if (!room) {
+      setIsLoading(true);
+      setError(null);
+    } else {
+      setIsLoading(false);
+    }
+  }, [room]);
 
   useEffect(() => {
     if (room?.startTime) {
@@ -41,6 +52,17 @@ export default function Room() {
     }
   }, [room?.startTime]);
 
+  useEffect(() => {
+    if (selectedProblem?.testCases?.public) {
+      setTestResults(selectedProblem.testCases.public.map(testCase => ({
+        ...testCase,
+        id: testCase.id || Math.random().toString(),
+        isPublic: true,
+        result: undefined
+      })));
+    }
+  }, [selectedProblemIndex, selectedProblem]);
+
   const copyInviteLink = () => {
     navigator.clipboard.writeText(room?.id || '');
   };
@@ -49,6 +71,11 @@ export default function Room() {
     if (!selectedProblem) return;
     setIsRunning(true);
     setTestResults([]); // Clear previous test results
+    if (selectedProblem.testCases.public.length === 0) {
+      setTestResults([{ id: 'no-tests', input: '', expectedOutput: '', isPublic: true }]);
+      setIsRunning(false);
+      return;
+    }
     const results = await Promise.all(
       selectedProblem.testCases.public.map(async (testCase) => ({
         ...testCase,
@@ -91,28 +118,67 @@ export default function Room() {
   const handlePreviousProblem = () => {
     if (selectedProblemIndex > 0) {
       setSelectedProblemIndex(selectedProblemIndex - 1);
-      setTestResults([]);
-      setCode(selectedProblem?.starterCode || '');
     }
   };
 
   const handleNextProblem = () => {
     if (selectedProblemIndex < (room?.problems.length || 1) - 1) {
       setSelectedProblemIndex(selectedProblemIndex + 1);
-      setTestResults([]);
-      setCode(selectedProblem?.starterCode || '');
     }
   };
 
   useEffect(() => {
     if (selectedProblem) {
-      setCode(selectedProblem.starterCode || '');
-      setTestResults([]);
-      setShowTestResults(true);
+      try {
+        setCode(selectedProblem.starterCode || '');
+        setTestResults(
+          selectedProblem.testCases?.public?.map(testCase => ({
+            ...testCase,
+            result: undefined
+          })) || []
+        );
+        setShowTestResults(true);
+      } catch (err) {
+        setError('Error loading problem data');
+        console.error('Error:', err);
+      }
     }
   }, [selectedProblem]);
 
-  if (!room) return <div className="text-center mt-10">Loading room...</div>;
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading room...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center text-red-600">
+          <p>{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!room) return (
+    <div className="h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center text-gray-600">
+        <p>Room not found</p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -164,9 +230,9 @@ export default function Room() {
                   <div className="flex items-center gap-2">
                     <span
                       className={`px-2 py-1 rounded-full text-sm ${
-                        selectedProblem.difficulty === 'easy'
+                        selectedProblem?.difficulty === 'easy'
                           ? 'bg-green-100 text-green-800'
-                          : selectedProblem.difficulty === 'medium'
+                          : selectedProblem?.difficulty === 'medium'
                           ? 'bg-yellow-100 text-yellow-800'
                           : 'bg-red-100 text-red-800'
                       }`}
@@ -200,35 +266,35 @@ export default function Room() {
               </div>
 
               {/* Code Editor and Action Buttons */}
-              <div className="flex-1 flex flex-col overflow-hidden p-4">
-                <CodeEditor
-                  problemId={selectedProblem.id}
-                  onRun={handleRunCode}
-                  onSubmit={handleSubmitCode}
-                  initialTemplate={selectedProblem.starterCode}
-                  setCode={setCode}
-                  code={code}
-                />
-                {/* Action Buttons */}
-                
-              </div>
+              <div className="flex-1 flex flex-col min-h-0">
+                <div className="flex-1 overflow-auto">
+                  <CodeEditor
+                    problemId={selectedProblem.id}
+                    onRun={handleRunCode}
+                    onSubmit={handleSubmitCode}
+                    initialTemplate={selectedProblem.starterCode}
+                    setCode={setCode}
+                    code={code}
+                  />
+                </div>
 
-              {/* Test Results */}
-              <div className="p-4 bg-gray-100">
-                <button
-                  onClick={() => setShowTestResults(!showTestResults)}
-                  className="flex items-center gap-2 mb-4 text-sm text-gray-700 focus:outline-none"
-                >
-                  {showTestResults ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                  <span className="font-medium">
-                    {showTestResults ? 'Hide' : 'Show'} Test Results
-                  </span>
-                </button>
-                {showTestResults && (
-                  <div className="overflow-auto max-h-40">
-                    <TestResults testCases={testResults} isLoading={isRunning} />
-                  </div>
-                )}
+                {/* Test Results */}
+                <div className="bg-gray-100 border-t">
+                  <button
+                    onClick={() => setShowTestResults(!showTestResults)}
+                    className="flex items-center gap-2 p-2 w-full text-sm text-gray-700 focus:outline-none"
+                  >
+                    {showTestResults ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                    <span className="font-medium">
+                      {showTestResults ? 'Hide' : 'Show'} Test Results
+                    </span>
+                  </button>
+                  {showTestResults && (
+                    <div className="overflow-auto" style={{ maxHeight: '30vh' }}>
+                      <TestResults testCases={testResults} isLoading={isRunning} />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ) : (
